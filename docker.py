@@ -95,58 +95,6 @@ class DockerAPIScanner:
 
         return vulnerabilities
 
-    def test_container_escape(self):
-        """测试容器逃逸漏洞"""
-        vulnerabilities = []
-
-        try:
-            container_config ={
-                    "Image": "docker.1ms.run/library/alpine",
-                    "Cmd": ["chroot", "/host", "bash"],
-                    "AttachStdin": True,
-                    "AttachStdout": True,
-                    "AttachStderr": True,
-                    "Tty": True,
-                    "OpenStdin": True,
-                    "HostConfig": {
-                        "Privileged": True,
-                        "Binds": ["/:/host"],
-                        "AutoRemove": True
-                    }
-                }
-
-            url = urljoin(self.base_url, "/containers/create")
-            response = self.session.post(url, json=container_config, timeout=self.timeout)
-
-            print(response.status_code)
-
-            if response.status_code == 201:
-                try:
-                    container_id = response.json().get("Id")
-                    self.log(f"发现容器逃逸风险: 可以创建特权容器并执行 chroot 命令", "VULNERABILITY")
-                    vulnerabilities.append({
-                        "type": "容器逃逸",
-                        "endpoint": "/containers/create",
-                        "url": url,
-                        "status_code": response.status_code,
-                        "description": "可以创建特权容器并执行 chroot 命令，存在容器逃逸风险",
-                        "container_id": container_id
-                    })
-
-                    if container_id:
-                        try:
-                            delete_url = urljoin(self.base_url, f"/containers/{container_id}")
-                            self.session.delete(delete_url, timeout=self.timeout)
-                        except requests.exceptions.RequestException as e:
-                            self.log(f"删除容器时出错: {str(e)}", "ERROR")
-                except ValueError as e:
-                    self.log(f"解析响应JSON时出错: {str(e)}", "ERROR")
-
-        except requests.exceptions.RequestException as e:
-            self.log(f"测试容器逃逸时出错: {str(e)}", "ERROR")
-
-        return vulnerabilities
-
     def test_image_pull(self):
         """测试镜像拉取权限，并记录镜像ID后删除"""
         vulnerabilities = []
@@ -367,7 +315,6 @@ class DockerAPIScanner:
         # 定义所有扫描函数
         scan_functions = [
             ("未授权访问", self.test_unauthorized_access),
-            ("容器逃逸", self.test_container_escape),# 暂时不支持容器逃逸
             ("镜像拉取", self.test_image_pull),
             ("容器创建", self.test_container_creation),
             ("网络访问", self.test_network_access),
