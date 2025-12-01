@@ -38,14 +38,14 @@
    - 检测系统信息中的敏感字段
    - 如DriverStatus、SystemStatus等
 
-## 安装依赖
+## 获取
 
 ### 拉取仓库
 ```bash
 git clone https://github.com/sulan-hub/docker-api-scan
 cd docker-api-scan-main
 ```
-
+### 安装依赖
 ```bash
 pip install requests
 ```
