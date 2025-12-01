@@ -40,6 +40,12 @@
 
 ## 安装依赖
 
+### 拉取仓库
+```bash
+git clone https://github.com/sulan-hub/docker-api-scan
+cd docker-api-scan-main
+```
+
 ```bash
 pip install requests
 ```
