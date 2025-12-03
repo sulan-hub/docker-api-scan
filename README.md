@@ -2,7 +2,15 @@
 
 这是一个用于检测Docker API安全漏洞的Python扫描器。
 
+
 ## 功能特性
+
+### 最近更新
+
+#### **v1.2**
+   1. `--pratt [PRATT]`下载指定镜像(默认:`alpine`,推荐体积小)，会留下镜像痕迹，下载成功不就不要换镜像使用了。格式: `--pratt <镜像名>` 或 `--pratt`
+
+   2. `--shell`返回容器里的`bash`（一些镜像可能没有bash，会采用sh，如果都没有那建议用alpine）此容器内的`shell`连接了宿主机的`物理卷`
 
 ### 检测的漏洞类型
 
@@ -38,14 +46,9 @@
    - 检测系统信息中的敏感字段
    - 如DriverStatus、SystemStatus等
 
-## 获取
 
-### 拉取仓库
-```bash
-git clone https://github.com/sulan-hub/docker-api-scan
-cd docker-api-scan-main
-```
-### 安装依赖
+## 安装依赖
+
 ```bash
 pip install requests
 ```
@@ -60,11 +63,8 @@ python dk.py 192.168.1.100
 
 # 指定端口
 python dk.py 192.168.1.100 -p 2376
-
-# 多端口
+&&
 python dk.py 192.168.1.100 -p 2376-2380
-or
-python dk.py 192.168.1.100 -p "2370-2380"
 
 # 使用TLS连接（自动切换到2376端口）
 python dk.py 192.168.1.100 --tls
@@ -74,6 +74,15 @@ python dk.py 192.168.1.100 -t 15
 
 # 设置并发线程数
 python dk.py 192.168.1.100 --threads 10
+
+# 扫描并下载镜像
+python docker.py 192.168.1.100 -p 2375-2380 --pratt
+
+# 扫描并获取shell
+python docker.py 192.168.1.100 -p 2375-2380 --shell
+
+# 使用指定镜像
+python docker.py 192.168.1.100 -p 2375-2380 --pratt ubuntu --shell
 ```
 
 ### 命令行参数
@@ -83,8 +92,10 @@ python dk.py 192.168.1.100 --threads 10
 - `-t, --timeout`: 请求超时时间（默认: 10秒）
 - `--threads`: 并发线程数（默认: 5）
 - `--tls`: 使用TLS连接（端口2376）
+- `--pratt [PRATT]`: 镜像测试攻击准备
+- `--shell`: 返回容器的shell,存在特殊权限
 
-## 输出示例
+## 输出示例（老旧样式）
 
 ```
 [2024-01-15 10:30:00] [INFO] 开始扫描目标: 192.168.1.100:2375
